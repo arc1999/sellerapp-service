@@ -1,0 +1,40 @@
+version: "2.1"
+services:
+  productinfo:
+    container_name: product_cntnr
+    build: ./api-productinfo-service
+    image: arc1999/api-productinfo-service
+    ports:
+      - '8090:8090'
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+  scraping:
+    build: ./api-scraping-service
+    image: arc1999/api-scraping-service
+    ports:
+      - '8080:8080'
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+  db:
+    image: mongo:latest
+    container_name: mongo_db
+#    environment:
+#      MONGO_INITDB_ROOT_USERNAME: root
+#      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok'
+      interval: 10s
+      timeout: 10s
+      retries: 5
+volumes:
+  mongodb_data_container:
